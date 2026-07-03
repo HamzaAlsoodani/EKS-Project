@@ -1,0 +1,19 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars          # may hold secrets - keep out (add exceptions if needed)
+override.tf
+override.tf.json
+.terraformrc
+terraform.rc
+
+# Keep the lock file (pins provider versions) - do NOT ignore it
+!**/.terraform.lock.hcl
+
+# Existing
+.sass-cache/
+
+# OS noise
+.DS_Store
