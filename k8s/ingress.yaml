@@ -1,0 +1,25 @@
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-2048
+  annotations:
+    
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx # route through your ingress-nginx controller
+  tls:
+    - hosts:
+        - eks.hamza-alsoodani.com
+      secretName: app-2048-tls # cert-manager stores the cert here; nginx serves it
+  rules:
+    - host: eks.hamza-alsoodani.com # external-dns creates this Route53 record
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app-2048 # send matching traffic to the Service
+                port:
+                  number: 80

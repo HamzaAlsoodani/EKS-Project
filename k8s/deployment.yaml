@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: 2048-app
+  labels:
+    app: 2048-app
+spec:
+  replicas: 3
+  selector: 
+    matchLabels:
+      app: app-2048
+  template:
+    metadata:
+      labels:
+        app: app-2048
+    spec:
+      containers:
+      - name: app-2048
+        image: 076056288980.dkr.ecr.eu-west-2.amazonaws.com/app-2048:v1.0.0
+        ports:
+        - containerPort: 80
