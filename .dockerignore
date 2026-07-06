@@ -1,0 +1,13 @@
+infra
+.git
+.github
+argocd
+cert-manager
+helm-values
+k8s
+*.md
+Rakefile
+.gitignore
+.jshintrc
+docker-compose
+dockerfile
