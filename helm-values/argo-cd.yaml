@@ -1,0 +1,16 @@
+server:
+  extraArgs:
+    - --insecure 
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hostname: argocd.eks.hamza-alsoodani.com
+    tls: true
+    extraTls:
+      - secretName: argocd-ingress-tls
+        hosts:
+          - argocd.eks.hamza-alsoodani.com

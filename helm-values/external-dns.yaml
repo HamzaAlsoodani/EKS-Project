@@ -1,0 +1,15 @@
+# Values for the external-dns chart (consumed by argocd/external-dns.yaml).
+provider: aws
+
+aws:
+  region: eu-west-2
+
+domainFilters:
+  - "hamza-alsoodani.com"
+
+policy: sync # create AND delete records to match cluster state
+
+# IRSA: let the external-dns pod assume its AWS role to write Route53 records.
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::076056288980:role/eks-2048-external-dns
