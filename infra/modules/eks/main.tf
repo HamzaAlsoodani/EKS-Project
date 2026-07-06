@@ -24,14 +24,9 @@ module "eks" {
   subnet_ids = var.private_subnets
 
 
-  eks_managed_node_groups = {
-    default = {
-      instance_types = var.instance_types 
-      min_size       = var.min_size       
-      max_size       = var.max_size       
-      desired_size   = var.desired_size
-    }
-  }
+  # Node groups are defined at the root and passed straight through to the
+  # community module, so you can use its full format (instance_types, disk_size, scaling…).
+  eks_managed_node_groups = var.eks_managed_node_groups
 
   tags = {
     Environment = "dev"
