@@ -12,6 +12,7 @@ A containerised web application deployed to a production grade Amazon EKS cluste
 - [Prerequisites](#prerequisites)
 - [Deployment](#deployment)
 - [Accessing the Services](#accessing-the-services)
+- [Screenshots](#screenshots)
 - [Teardown](#teardown)
 
 ## Overview
@@ -36,7 +37,7 @@ The worker nodes run in private subnets with no direct exposure to the internet.
 
 ## Architecture
 
-> Architecture diagram to be added here.
+![Architecture Diagram](images/architecture.gif)
 
 At a high level, a request flows through the stack as follows. A user request for the application hostname resolves through Route 53 (managed by ExternalDNS) to the public load balancer. The load balancer forwards traffic to the NGINX Ingress Controller, which terminates TLS using a certificate issued by CertManager and routes the request to the application service. The service load balances across the application pods running on private worker nodes. ArgoCD keeps those pods in step with the manifests in Git, while Prometheus and Grafana observe the whole cluster.
 
@@ -147,6 +148,24 @@ Before DNS and certificates are ready, any service can be reached locally with a
 ```
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
+
+## Screenshots
+
+### 2048 application served over HTTPS
+
+![2048 application](images/app.png)
+
+### ArgoCD: application synced and healthy
+
+![ArgoCD](images/argocd.png)
+
+### Grafana: cluster dashboards
+
+![Grafana](images/grafana.png)
+
+### Prometheus: scrape targets
+
+![Prometheus](images/prometheus.png)
 
 ## Teardown
 
