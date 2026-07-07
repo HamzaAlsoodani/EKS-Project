@@ -1,0 +1,92 @@
+name: Destroy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "destroy" to confirm deletion'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-2
+
+jobs:
+  confirm-destroy:
+    name: Confirm Destruction
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "destroy" ]; then
+            echo "Confirmation failed. You must type 'destroy' to proceed."
+            exit 1
+          fi
+          echo "Confirmation validated"
+
+  # Terraform destroy
+  terraform-destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+    needs: confirm-destroy
+    defaults:
+      run:
+        working-directory: ./infra
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.12.2"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: github-actions-destroy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Delete LoadBalancer services first
+        run: |
+          # Removes the AWS load balancer so it does not block the VPC teardown.
+          # Ignore errors if kubeconfig or cluster is already gone.
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-2048 || true
+          kubectl delete svc --all-namespaces --field-selector spec.type=LoadBalancer --ignore-not-found=true || true
+          sleep 60
+
+      - name: Terraform Destroy (excluding OIDC)
+        run: |
+          # Destroy everything except the GitHub OIDC resources, so this workflow
+          # keeps the credentials it is currently using to run.
+          terraform destroy -auto-approve \
+            -target=helm_release.kube_prom_stack \
+            -target=helm_release.argocd \
+            -target=helm_release.external_dns \
+            -target=helm_release.cert_manager \
+            -target=helm_release.nginx_ingress \
+            -target=module.cert_manager_irsa \
+            -target=module.external_dns_irsa \
+            -target=module.eks \
+            -target=module.vpc
+
+      - name: Manual OIDC Cleanup Notice
+        run: |
+          echo "OIDC resources were preserved so this workflow could authenticate."
+          echo "If you want to remove them too, run locally:"
+          echo "  terraform destroy -target=aws_iam_role.github_actions_role"
+          echo "  terraform destroy -target=aws_iam_openid_connect_provider.github_actions"
+
+      - name: Verify cleanup
+        run: |
+          echo ""
+          echo "Infrastructure destruction complete"
+          echo ""
