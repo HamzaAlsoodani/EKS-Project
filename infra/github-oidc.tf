@@ -65,7 +65,7 @@ resource "aws_iam_role_policy" "ecr_push_policy" {
           "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload"
         ]
-        Resource = "arn:aws:ecr:${local.region}:076056288980:repository/app-2048"
+        Resource = aws_ecr_repository.app.arn
       }
     ]
   })
@@ -114,7 +114,8 @@ resource "aws_iam_role_policy" "terraform_infra_policy" {
       { Effect = "Allow", Action = "autoscaling:*", Resource = "*" },
       { Effect = "Allow", Action = "route53:*", Resource = "*" },
       { Effect = "Allow", Action = "kms:*", Resource = "*" },
-      { Effect = "Allow", Action = "elasticloadbalancing:*", Resource = "*" }
+      { Effect = "Allow", Action = "elasticloadbalancing:*", Resource = "*" },
+      { Effect = "Allow", Action = "ecr:*", Resource = "*" }
     ]
   })
 }

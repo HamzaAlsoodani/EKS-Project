@@ -1,11 +1,8 @@
-# Values for the cert-manager chart (consumed by argocd/cert-manager.yaml).
+# Values for the cert-manager chart, installed by infra/helm.tf.
 installCRDs: true
 
 extraArgs:
   - --dns01-recursive-nameservers=8.8.8.8:53,1.1.1.1:53
   - --dns01-recursive-nameservers-only
 
-
-serviceAccount:
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::076056288980:role/eks-2048-cert-manager
+# The IRSA role ARN is set by Terraform in helm.tf, so it is not repeated here.

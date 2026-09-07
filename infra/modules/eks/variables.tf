@@ -1,6 +1,3 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# Input slots for this module. The root eks.tf fills these in when it calls us.
-# ─────────────────────────────────────────────────────────────────────────────
 
 variable "cluster_name" {
   description = "Name for the EKS cluster"
@@ -22,17 +19,50 @@ variable "private_subnets" {
   type        = list(string)
 }
 
-# Managed node groups in the community module's format. "any" lets you pass a
-# flexible nested map (instance_types, disk_size, min/max/desired_size, etc.).
+variable "control_plane_subnets" {
+  description = "Subnet IDs for the cluster's control plane network interfaces"
+  type        = list(string)
+  default     = []
+}
+
+
 variable "eks_managed_node_groups" {
   description = "Map of EKS managed node group definitions"
   type        = any
   default = {
     default = {
-      instance_types = ["t3.medium"]
-      min_size       = 1
-      max_size       = 3
-      desired_size   = 2
+      min_size     = 2
+      max_size     = 4
+      desired_size = 2
     }
   }
+}
+
+# Applied to every node group above.
+variable "node_group_defaults" {
+  description = "Defaults applied to every managed node group"
+  type        = any
+  default = {
+    instance_types = ["t3a.large", "t3.large"]
+    ami_type       = "AL2023_x86_64_STANDARD" # AL2 is not available on 1.33+
+
+    # disk_size is ignored when a custom launch template is used, so set it here
+    block_device_mappings = {
+      xvda = {
+        device_name = "/dev/xvda"
+        ebs = {
+          volume_size           = 50
+          volume_type           = "gp3"
+          encrypted             = true
+          delete_on_termination = true
+        }
+      }
+    }
+  }
+}
+
+variable "tags" {
+  description = "Extra tags merged into the module's baseline tags"
+  type        = map(string)
+  default     = {}
 }

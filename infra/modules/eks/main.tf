@@ -7,10 +7,13 @@ module "eks" {
   cluster_version = var.cluster_version
 
 
-  cluster_endpoint_public_access = true
+  cluster_endpoint_public_access = true # for testing purposes only
 
 
   enable_cluster_creator_admin_permissions = true
+
+
+  enable_irsa = true # enable IAM Roles for Service Accounts (IRSA) so pods can borrow AWS roles
 
 
   cluster_addons = {
@@ -20,16 +23,17 @@ module "eks" {
   }
 
 
-  vpc_id     = var.vpc_id
-  subnet_ids = var.private_subnets
+  vpc_id                   = var.vpc_id
+  subnet_ids               = var.private_subnets
+  control_plane_subnet_ids = var.control_plane_subnets
 
 
-  # Node groups are defined at the root and passed straight through to the
-  # community module, so you can use its full format (instance_types, disk_size, scaling…).
-  eks_managed_node_groups = var.eks_managed_node_groups
+  # Node groups use the community module's format (instance_types, scaling, etc.)
+  eks_managed_node_groups         = var.eks_managed_node_groups
+  eks_managed_node_group_defaults = var.node_group_defaults
 
-  tags = {
+  tags = merge({
     Environment = "dev"
     Terraform   = "true"
-  }
+  }, var.tags)
 }

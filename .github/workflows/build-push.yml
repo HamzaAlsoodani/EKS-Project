@@ -15,7 +15,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write 
 
 jobs:
   build-and-push:
@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set short SHA
         run: echo "SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
@@ -59,3 +61,15 @@ jobs:
       - name: Push to ECR
         run: |
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.SHORT_SHA }}
+
+      # ArgoCD deploys what is in Git, so write the new tag back to the manifest.
+      - name: Update image tag in manifest
+        run: |
+          sed -i "s|\(image: .*/${{ env.ECR_REPOSITORY }}\):.*|\1:${{ env.SHORT_SHA }}|" k8s/deployment.yaml
+
+          if ! git diff --quiet k8s/deployment.yaml; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git commit -am "Update image tag to ${{ env.SHORT_SHA }}"
+            git push
+          fi

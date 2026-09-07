@@ -4,7 +4,7 @@ module "external_dns_irsa" {
 
   role_name                     = "${local.cluster_name}-external-dns"
   attach_external_dns_policy    = true
-  external_dns_hosted_zone_arns = ["arn:aws:route53:::hostedzone/Z09462481WSUBXYSKQHGQ"]
+  external_dns_hosted_zone_arns = [local.zone_arn]
 
   oidc_providers = {
     eks = {
@@ -21,7 +21,7 @@ module "cert_manager_irsa" {
 
   role_name                     = "${local.cluster_name}-cert-manager"
   attach_cert_manager_policy    = true
-  cert_manager_hosted_zone_arns = ["arn:aws:route53:::hostedzone/Z09462481WSUBXYSKQHGQ"]
+  cert_manager_hosted_zone_arns = [local.zone_arn]
 
   oidc_providers = {
     eks = {
