@@ -10,5 +10,5 @@ spec:
     app: app-2048 
   ports:
     - port: 80 # the Service's port
-      targetPort: 80 # the pod's containerPort
+      targetPort: 8080 # the pod's containerPort
       protocol: TCP
