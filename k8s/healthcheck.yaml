@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: healthcheck
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: healthcheck
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  resourceNames: ["app-2048"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: healthcheck
+subjects:
+- kind: ServiceAccount
+  name: healthcheck
+  namespace: default
+roleRef:
+  kind: Role
+  name: healthcheck
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: healthcheck
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: healthcheck
+          restartPolicy: Never
+          containers:
+          - name: healthcheck
+            image: registry.k8s.io/kubectl:v1.34.0
+            args: ["wait", "deployment/app-2048", "--for=condition=Available", "--timeout=60s"]
