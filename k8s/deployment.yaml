@@ -14,6 +14,8 @@ spec:
       labels:
         app: app-2048
     spec:
+      serviceAccountName: app-2048
+      automountServiceAccountToken: false
       containers:
       - name: app-2048
         image: 076056288980.dkr.ecr.eu-west-2.amazonaws.com/app-2048:v1.0.0
