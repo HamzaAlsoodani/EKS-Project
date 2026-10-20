@@ -37,8 +37,6 @@ The worker nodes run in private subnets with no direct exposure to the internet.
 
 ## Architecture
 
-![Architecture Diagram](images/architecture.gif)
-
 At a high level, a request flows through the stack as follows. A user request for the application hostname resolves through Route 53 (managed by ExternalDNS) to the public load balancer. The load balancer forwards traffic to the NGINX Ingress Controller, which terminates TLS using a certificate issued by CertManager and routes the request to the application service. The service load balances across the application pods running on private worker nodes. ArgoCD keeps those pods in step with the manifests in Git, while Prometheus and Grafana observe the whole cluster.
 
 ## Key Features
